@@ -1,0 +1,6 @@
+{
+  "name": "Shraya Stream's It Best",
+  "description": "A minimal web app that links to a streaming site to binge watch your favourite shows, curated in Oxford English.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
