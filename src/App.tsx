@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Play, Search, Heart, ChevronRight, Sparkles, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import gsap from "gsap";
@@ -30,6 +30,7 @@ const ROMANCE_PICKS = [
 
 export default function App() {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [activeStream, setActiveStream] = useState<string | null>(null);
 
   useEffect(() => {
     // GSAP reveal animation for hero content
@@ -50,6 +51,29 @@ export default function App() {
       );
     }
   }, []);
+
+  if (activeStream) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col">
+        <div className="h-16 bg-zinc-900 border-b border-zinc-800 flex items-center px-6 justify-between">
+          <span className="font-clumsy text-3xl font-bold tracking-wide text-rose-400">
+            shraya stream 🎀
+          </span>
+          <button 
+            onClick={() => setActiveStream(null)}
+            className="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm rounded-full transition-colors font-medium shadow-md shadow-rose-500/20"
+          >
+            Close Player 🌸
+          </button>
+        </div>
+        <iframe 
+          src={activeStream} 
+          className="w-full flex-1 border-none bg-black" 
+          allowFullScreen 
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-stone-800 font-sans selection:bg-rose-200 cursor-none relative overflow-x-hidden">
@@ -133,16 +157,14 @@ export default function App() {
             
             <div className="reveal-item pt-6 flex flex-wrap items-center gap-4 group">
               {/* Primary Call to Action linked exactly as requested */}
-              <a
-                href="https://vidsrc.win/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-3 px-8 py-4 bg-rose-900 text-rose-50 rounded-full hover:bg-rose-800 transition-all duration-300 shadow-[0_8px_30px_rgb(136,19,55,0.25)] hover:shadow-[0_8px_40px_rgb(136,19,55,0.35)] hover:-translate-y-0.5 active:translate-y-0 relative overflow-hidden"
+              <button
+                onClick={() => setActiveStream("https://vidsrc.win/")}
+                className="group flex items-center gap-3 px-8 py-4 bg-rose-900 text-rose-50 rounded-full hover:bg-rose-800 transition-all duration-300 shadow-[0_8px_30px_rgb(136,19,55,0.25)] hover:shadow-[0_8px_40px_rgb(136,19,55,0.35)] hover:-translate-y-0.5 active:translate-y-0 relative overflow-hidden focus:outline-none"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                 <Play className="w-5 h-5 fill-current opacity-90 transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
                 <span className="font-medium tracking-wide">binge watch ur favourite show</span>
-              </a>
+              </button>
               <button className="px-8 py-4 bg-white/60 backdrop-blur-xl text-stone-800 rounded-full hover:bg-white/90 hover:-translate-y-0.5 transition-all duration-300 font-medium border border-rose-900/15 hover:border-rose-900/30 shadow-sm relative">
                 Examine Catalogue
                 {/* Wobbly line doodle */}
@@ -165,8 +187,8 @@ export default function App() {
            <span className="font-clumsy text-stone-500 text-lg ml-2">lovecore</span>
         </div>
 
-        <MovieRow title="Trending Amongst the Ton 🌸" movies={AESTHETIC_MOVIES} note="omg everyone is watching these rn !!" />
-        <MovieRow title="Because You Fancied It Ends With Us 💌" movies={ROMANCE_PICKS} note="curated just for u bestie 🎀" />
+        <MovieRow title="Trending Amongst the Ton 🌸" movies={AESTHETIC_MOVIES} note="omg everyone is watching these rn !!" onPlay={(url) => setActiveStream(url)} />
+        <MovieRow title="Because You Fancied It Ends With Us 💌" movies={ROMANCE_PICKS} note="curated just for u bestie 🎀" onPlay={(url) => setActiveStream(url)} />
       </div>
       
       {/* Playful Footer */}
@@ -191,7 +213,7 @@ export default function App() {
   );
 }
 
-function MovieRow({ title, movies, note }: { title: string, movies: Array<{id: number, title: string, img: string}>, note?: string }) {
+function MovieRow({ title, movies, note, onPlay }: { title: string, movies: Array<{id: number, title: string, img: string}>, note?: string, onPlay: (url: string) => void }) {
   return (
     <div className="space-y-6 relative">
       {/* Decorative row background blob */}
@@ -219,14 +241,12 @@ function MovieRow({ title, movies, note }: { title: string, movies: Array<{id: n
         style={{ perspective: 1500 }}
       >
         {movies.map((movie) => (
-          <motion.a
+          <motion.button
             key={movie.id}
-            href="https://vidsrc.win/"
-            target="_blank" 
-            rel="noopener noreferrer"
+            onClick={() => onPlay("https://vidsrc.win/")}
             whileHover={{ scale: 1.05, rotateZ: (movie.id % 2 === 0 ? 2 : -2), translateY: -10 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="group relative flex-none w-[220px] sm:w-[260px] md:w-[300px] snap-start bg-white p-3 pb-12 rounded-xl shadow-[0_10px_30px_-10px_rgba(244,63,94,0.15)] hover:shadow-[0_20px_40px_-10px_rgba(244,63,94,0.3)] transition-shadow duration-500 cursor-pointer border border-rose-50"
+            className="group relative flex-none w-[220px] sm:w-[260px] md:w-[300px] snap-start bg-white p-3 pb-12 rounded-xl shadow-[0_10px_30px_-10px_rgba(244,63,94,0.15)] hover:shadow-[0_20px_40px_-10px_rgba(244,63,94,0.3)] transition-shadow duration-500 cursor-pointer border border-rose-50 text-left focus:outline-none"
           >
             <div className="relative w-full aspect-[4/5] overflow-hidden rounded-md bg-stone-100">
               <img 
@@ -253,7 +273,7 @@ function MovieRow({ title, movies, note }: { title: string, movies: Array<{id: n
             
             {/* Cute tape decoration */}
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-white/40 backdrop-blur-sm shadow-sm rotate-2 opacity-60 border border-white/50" style={{ clipPath: 'polygon(0 10%, 100% 0, 95% 90%, 5% 100%)' }} />
-          </motion.a>
+          </motion.button>
         ))}
       </div>
     </div>
