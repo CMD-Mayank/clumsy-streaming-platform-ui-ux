@@ -31,6 +31,24 @@ const ROMANCE_PICKS = [
 export default function App() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [activeStream, setActiveStream] = useState<string | null>(null);
+  const [isVideoActive, setIsVideoActive] = useState(false);
+
+  useEffect(() => {
+    const handleBlur = () => {
+      if (document.activeElement?.tagName === 'IFRAME') {
+        setIsVideoActive(true);
+      }
+    };
+    const handleFocus = () => {
+      setIsVideoActive(false);
+    };
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   useEffect(() => {
     // GSAP reveal animation for hero content
@@ -55,22 +73,34 @@ export default function App() {
   if (activeStream) {
     return (
       <div className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col">
-        <div className="h-16 bg-zinc-900 border-b border-zinc-800 flex items-center px-6 justify-between">
+        <div 
+          className="h-16 bg-zinc-900 border-b border-zinc-800 flex items-center px-6 justify-between relative z-20"
+          onMouseEnter={() => setIsVideoActive(false)}
+        >
           <span className="font-clumsy text-3xl font-bold tracking-wide text-rose-400">
             shraya stream 🎀
           </span>
           <button 
-            onClick={() => setActiveStream(null)}
+            onClick={() => {
+              setActiveStream(null);
+              setIsVideoActive(false);
+            }}
             className="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm rounded-full transition-colors font-medium shadow-md shadow-rose-500/20"
           >
-            Close Player 🌸
+            Back to Home 🌸
           </button>
         </div>
-        <iframe 
-          src={activeStream} 
-          className="w-full flex-1 border-none bg-black" 
-          allowFullScreen 
-        />
+        <div className="relative flex-1 bg-black">
+          {/* Overlay to hide external logo */}
+          <div className={`absolute top-[1.125rem] left-[1.125rem] w-[150px] h-[40px] bg-[#0c0c0c] z-10 flex items-center shadow-[0_0_15px_10px_#0c0c0c] justify-center pointer-events-none transition-opacity duration-1000 delay-300 rounded-sm ${isVideoActive ? 'opacity-0' : 'opacity-100'}`}>
+            <span className="font-clumsy text-2xl text-rose-400 font-bold tracking-wide">shraya 🎀</span>
+          </div>
+          <iframe 
+            src={activeStream} 
+            className="absolute inset-0 w-full h-full border-none" 
+            allowFullScreen 
+          />
+        </div>
       </div>
     );
   }
